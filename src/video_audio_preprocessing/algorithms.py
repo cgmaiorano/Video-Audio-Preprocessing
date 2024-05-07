@@ -1,4 +1,4 @@
-"""Example functions for APP_NAME."""
+"""Example functions for video_audio_preprocessing."""
 
 
 def fibonacci(n: int) -> int:
