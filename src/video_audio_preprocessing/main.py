@@ -1,12 +1,20 @@
-from preprocess_utilities import list_files, process_and_concatenate_videos
+"""This module is responsible for video and audio preprocessing."""
 import os
+
+from preprocess_utilities import (
+    list_files,
+    parse_arguments,
+    process_and_concatenate_videos,
+)
 from tqdm import tqdm
 
 
-def __main__():
+def __main__() -> None:
+    """Main function for video and audio preprocessing."""
     video_format = "MXF"
-    video_input_folder = "/Users/celia.maiorano/Python_Repositories/semantic_sommeliers/Video-Audio_Preprocessing/data/videos"
-    audio_output_folder = "/Users/celia.maiorano/Python_Repositories/semantic_sommeliers/Video-Audio_Preprocessing/data/audios"
+    args = parse_arguments()
+    video_input_folder = args.video_folder
+    audio_output_folder = args.audio_folder
     audio_format = "wav"
     target_sample_rate = 16000
 
@@ -19,7 +27,7 @@ def __main__():
     grouped_files = {}
 
     for file in file_list:
-        participant_id = os.path.basename(file)[:7]  # Using first 7 as "Participant ID", change for external IDs
+        participant_id = os.path.basename(file)[:7]  # change for external IDs
         if participant_id not in grouped_files:
             grouped_files[participant_id] = []
         grouped_files[participant_id].append(file)
@@ -28,7 +36,7 @@ def __main__():
         grouped_files.items(), desc="Processing Participant Files"
     ):
         files.sort()  # Ensure the files are in the correct order if not already
-        output_filename = f"{participant_id}_concatenated.{audio_format}"  # Switch to _speech_language if needed
+        output_filename = f"{participant_id}_concatenated.{audio_format}"
         output_path = os.path.join(audio_output_folder, output_filename)
         process_and_concatenate_videos(files, output_path, target_sample_rate)
 
