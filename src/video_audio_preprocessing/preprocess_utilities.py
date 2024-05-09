@@ -31,8 +31,8 @@ def extract_audio_from_video(video_path: str) -> bytes:
 
 
 def convert_stereo_to_mono(waveform: torch.Tensor) -> torch.Tensor:
-    """Converts stereo audio waveform to mono by averaging the channels."""
-    if waveform.shape[0] > 1:  # Check if the audio is stereo
+    """Checks and converts stereo audio waveform to mono by averaging the channels."""
+    if waveform.shape[0] > 1:
         waveform = torch.mean(waveform, dim=0, keepdim=True)
     return waveform
 
@@ -59,13 +59,9 @@ def save_audio(waveform: torch.Tensor, sample_rate: int, output_path: str) -> No
 def load_audio_from_bytes(audio_bytes: bytes, format: str) -> Tuple[torch.Tensor, int]:
     """Loads audio from bytes by first writing to a temporary file, then loading it."""
     with tempfile.NamedTemporaryFile(suffix=".wav") as temp_audio_file:
-        # Write the audio bytes to a temporary file
         temp_audio_file.write(audio_bytes)
         temp_audio_file.seek(0)  # Go back to the start of the file
-
-        # Load the audio from the temporary file
         waveform, sample_rate = torchaudio.load(temp_audio_file.name, format=format)
-
     return waveform, sample_rate
 
 
