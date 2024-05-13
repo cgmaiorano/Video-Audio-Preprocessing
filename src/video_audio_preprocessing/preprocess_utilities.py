@@ -1,6 +1,5 @@
 """This module provides utility functions for video and audio preprocessing."""
 import argparse
-import glob
 import json
 import os
 import re

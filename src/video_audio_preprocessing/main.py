@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 
 def main() -> None:
+    """This is the main function responsible for video and audio preprocessing."""
     args = parse_arguments()
     video_input_folder = args.video_folder
     audio_output_folder = args.audio_folder
@@ -28,7 +29,9 @@ def main() -> None:
             grouped_files[participant_id] = []
         grouped_files[participant_id].append(file)
 
-    for participant_id, files in tqdm(grouped_files.items(), desc="Processing Participant Files"):
+    for participant_id, files in tqdm(
+        grouped_files.items(), desc="Processing Participant"
+        ):
         files.sort()  # Further ensure files are sorted if needed
         output_filename = f"{participant_id}_concatenated.wav"
         output_path = os.path.join(audio_output_folder, output_filename)
