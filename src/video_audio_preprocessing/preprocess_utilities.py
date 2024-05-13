@@ -84,27 +84,29 @@ def natural_sort_key(s: str) -> list[str]:
     """Obtain a tuple that represents the natural order sort key of the input string."""
     return [
         int(text) if text.isdigit() else text.lower()
-        for text in re.split("([0-9]+)", s)
+        for text in re.split(r'(\d+)', s)
     ]
 
 
 
 def list_files(folder_path: str, format: str) -> List[str]:
-    """List files in a folder with a specific format.
-
+    """List files in a nested folder structure with a specific format.
+    
     Args:
         folder_path (str): The path to the folder.
-        format (str): The file format to filter by.
-
+        format (str): The file format to filter by, e.g., 'MXF'.
+    
     Returns:
-        List[str]: A list of file paths.
-
+        List[str]: A list of file paths, sorted naturally.
     """
-    path_pattern = os.path.join(folder_path, "**", "*." + format)
-    files = glob.glob(path_pattern, recursive=True)
+    # Modified to accommodate nested directory structures by participant ID
+    files = []
+    for root, dirs, filenames in os.walk(folder_path):
+        for filename in filenames:
+            if filename.endswith('.' + format):
+                files.append(os.path.join(root, filename))
     files.sort(key=natural_sort_key)
-    return files  # Use natural sorting to maintain order
-
+    return files
 
 def get_device() -> str:
     """Get the device (CPU or CUDA) for computation.
