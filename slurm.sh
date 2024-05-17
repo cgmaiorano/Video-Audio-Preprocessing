@@ -5,26 +5,42 @@
 #SBATCH -N1 --ntasks-per-node=4
 #SBATCH --mem-per-cpu=10G
 
-# Load Conda from your local installation
-source /home/ikim/miniconda3/etc/profile.d/conda.sh
+# Define variables for paths
+CONDA_DIR="/home/$USER/miniconda"
+CONDA_SH="$CONDA_DIR/etc/profile.d/conda.sh"
+CONDA_ENV_DIR="/home/$USER/.conda/envs/video_preprocessing"
 
-# Load FFMPEG from your local installation
-export PATH=/home/ikim/ffmpeg/bin:$PATH
+# Install Miniconda if not already installed
+if [ ! -d "$CONDA_DIR" ]; then
+    echo "Installing Miniconda..."
+    wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /home/$USER/miniconda.sh
+    bash /home/$USER/miniconda.sh -b -p $CONDA_DIR
+    rm /home/$USER/miniconda.sh
+fi
 
-# Navigate to the project directory
-cd /home/ikim/Video-Audio-Preprocessing
+# Set up Conda path and initialize
+export PATH="$CONDA_DIR/bin:$PATH"
+source $CONDA_SH
 
-# Create a new Conda environment if it does not exist
-srun bash -c 'if [ ! -d "/home/ikim/miniconda3/envs/video_preprocessing" ]; then conda create --prefix /home/ikim/miniconda3/envs/video_preprocessing python=3.10 -y; fi'
+# Ensure Conda uses local directories
+echo -e "pkgs_dirs:\n  - /home/$USER/.conda/pkgs\nenvs_dirs:\n  - /home/$USER/.conda/envs" > /home/$USER/.condarc
+
+# Create a new Conda environment if it doesn't exist
+if [ ! -d "$CONDA_ENV_DIR" ]; then
+    conda create --prefix $CONDA_ENV_DIR python=3.10 -y
+fi
 
 # Activate the environment
-source activate /home/ikim/miniconda3/envs/video_preprocessing
+conda activate $CONDA_ENV_DIR
 
-# Install dependencies if not already installed
-srun bash -c 'if [ ! -f "/home/ikim/miniconda3/envs/video_preprocessing/requirements_installed" ]; then pip install -r requirements.txt; touch /home/ikim/miniconda3/envs/video_preprocessing/requirements_installed; fi'
+# Navigate to the project directory
+cd /home/$USER/Video-Audio-Preprocessing
+
+# Install dependencies
+pip install -r requirements.txt
 
 # Execute the Python script with specified folders
-srun python src/video_audio_preprocessing/main.py --video_folder /home/ikim/Desktop/video_process --audio_folder /home/ikim/Desktop/audio/
+python src/video_audio_preprocessing/main.py --video_folder /data2/hbn/ --audio_folder /home/$USER/Desktop/audio/
 
 # Deactivate the environment at the end of the script
 conda deactivate
