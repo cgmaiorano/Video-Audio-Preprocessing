@@ -9,6 +9,14 @@ packages = [{include = "video_audio_preprocessing", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "~3.11"
+pyloudnorm = "0.1.1"
+ffmpeg-python = "0.2.0"
+numpy = "1.24.3"
+tqdm = "4.65.0"
+torch = "2.3.0"
+torchaudio = "2.3.0"
+sox = "14.4.2"
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.1.1"
