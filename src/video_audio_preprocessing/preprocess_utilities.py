@@ -4,10 +4,7 @@ import json
 import os
 import re
 import tempfile
-from typing import (
-    List,
-    Tuple,
-)
+from typing import List, Tuple
 
 import ffmpeg
 import numpy as np
@@ -35,16 +32,10 @@ def convert_stereo_to_mono(waveform: torch.Tensor) -> torch.Tensor:
         waveform = torch.mean(waveform, dim=0, keepdim=True)
     return waveform
 
-def resample_audio(
-    waveform: torch.Tensor,
-    orig_sample_rate: int,
-    new_sample_rate: int = 16000
-) -> Tuple[torch.Tensor, int]:
+
+def resample_audio(waveform: torch.Tensor, orig_sample_rate: int, new_sample_rate: int = 16000) -> Tuple[torch.Tensor, int]:
     """Resamples the audio waveform to a new sample rate."""
-    resampler = torchaudio.transforms.Resample(
-        orig_freq=orig_sample_rate,
-        new_freq=new_sample_rate
-    )
+    resampler = torchaudio.transforms.Resample(orig_freq=orig_sample_rate, new_freq=new_sample_rate)
     waveform_resampled = resampler(waveform)
     return waveform_resampled, new_sample_rate
 
@@ -64,28 +55,18 @@ def load_audio_from_bytes(audio_bytes: bytes, format: str) -> Tuple[torch.Tensor
     return waveform, sample_rate
 
 
-def normalize_loudness(
-    audio: np.ndarray, 
-    rate: int, 
-    target_loudness: int = -23
-) -> torch.Tensor:
+def normalize_loudness(audio: np.ndarray, rate: int, target_loudness: int = -23) -> torch.Tensor:
     """Normalizes the loudness of the audio to target_loudness."""
     meter = pyln.Meter(rate)  # create a BS.1770 meter
     current_loudness = meter.integrated_loudness(audio.squeeze())
     # Normalize the loudness of the audio to the target loudness level
-    loudness_normalized_audio = pyln.normalize.loudness(
-        audio.squeeze(), current_loudness, target_loudness
-    )
+    loudness_normalized_audio = pyln.normalize.loudness(audio.squeeze(), current_loudness, target_loudness)
     return torch.tensor(loudness_normalized_audio).unsqueeze(0)
 
 
-def natural_sort_key(s: str) -> list[str]:
+def natural_sort_key(s: str) -> list:
     """Obtain a tuple that represents the natural order sort key of the input string."""
-    return [
-        int(text) if text.isdigit() else text.lower()
-        for text in re.split(r'(\d+)', s)
-    ]
-
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
 
 
 def list_files(folder_path: str, format: str) -> List[str]:
@@ -107,6 +88,7 @@ def list_files(folder_path: str, format: str) -> List[str]:
     files.sort(key=natural_sort_key)
     return files
 
+
 def get_device() -> str:
     """Get the device (CPU or CUDA) for computation.
 
@@ -123,11 +105,7 @@ def save_json(file: str, results: dict) -> None:
         json.dump(results, f)
 
 
-def process_and_concatenate_videos(
-    video_files: List[str], 
-    output_path: str, 
-    target_sample_rate: int = 16000
-) -> None:
+def process_and_concatenate_videos(video_files: List[str], output_path: str, target_sample_rate: int = 16000) -> None:
     """Processes and concatenates videos into a single audio waveform.
 
     Args:
@@ -141,18 +119,23 @@ def process_and_concatenate_videos(
     """
     concatenated_waveform = []
     for video_file in video_files:
-        audio_bytes = extract_audio_from_video(video_file)
+        try:
+            audio_bytes = extract_audio_from_video(video_file)
+        except ffmpeg.Error:
+            print(f"Error processing {video_file}, skipping.")
+            continue
+
         waveform, sample_rate = load_audio_from_bytes(audio_bytes, "wav")
         waveform_mono = convert_stereo_to_mono(waveform)
         if sample_rate != target_sample_rate:
-            resampler = torchaudio.transforms.Resample(
-                orig_freq=sample_rate, new_freq=target_sample_rate
-            )
+            resampler = torchaudio.transforms.Resample(orig_freq=sample_rate, new_freq=target_sample_rate)
             waveform = resampler(waveform_mono)
         concatenated_waveform.append(waveform)
 
-    concatenated_waveform = torch.cat(concatenated_waveform, dim=1)
-    save_audio(concatenated_waveform, target_sample_rate, output_path)
+    if concatenated_waveform:
+        concatenated_waveform = torch.cat(concatenated_waveform, dim=1)
+        save_audio(concatenated_waveform, target_sample_rate, output_path)
+
 
 def parse_arguments() -> argparse.Namespace:
     """Parse command line arguments for Video and Audio Preprocessing."""
@@ -168,5 +151,17 @@ def parse_arguments() -> argparse.Namespace:
         type=str,
         default="./data/audios",
         help="Path to the audio folder"
+    )
+    parser.add_argument(
+        "--participant_file",
+        type=str,
+        default=None,
+        help="Path to the JSON file with participant IDs to process"
+    )
+    parser.add_argument(
+        "--error_log",
+        type=str,
+        default="./error_log.json",
+        help="Path to the error log file"
     )
     return parser.parse_args()
