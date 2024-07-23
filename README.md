@@ -4,14 +4,10 @@ this repository extracts audio from video recordings, concatenates multiple segm
 ## Requirements: ffmpeg
 this repository requires native download of ffmpeg from the developer site: https://ffmpeg.org/download.html
 
-## Requirements: python 3.9 
-``` 
-conda create -n preprocess-env python=3.9
-```
-
 ## Installation:
 ```
-pip install -r requirements.txt
+conda env create -f environment.yml
+poetry install
 ```
 
 ## Quick start:
