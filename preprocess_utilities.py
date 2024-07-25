@@ -17,7 +17,7 @@ def extract_audio_from_video(video_path):
         video_path (str): The path to the video file from which the audio will be extracted.
     
     Returns:
-        tuple: A tuple of mixed integer and string parts for sorting.
+        out (arr): Extracted audio bytes.
     """
     stream = ffmpeg.input(video_path)
     mixed_audio = ffmpeg.filter([stream], 'amix', inputs=2, duration='longest')
@@ -32,6 +32,12 @@ def extract_audio_from_video(video_path):
 def convert_stereo_to_mono(waveform):
     """
     Converts stereo audio waveform to mono by averaging the channels.
+
+    Args:
+        waveform (arr): output from load_audio_from_bytes.
+
+    Returns:
+        waveform (arr): waveform converted to mono from stereo.
     """
     if waveform.shape[0] > 1:  # Check if the audio is stereo
         waveform = torch.mean(waveform, dim=0, keepdim=True)
@@ -55,6 +61,14 @@ def save_audio(waveform, sample_rate, output_path):
 def load_audio_from_bytes(audio_bytes, format):
     """
     Loads audio from bytes by first writing to a temporary file, then loading it.
+
+    Args: 
+        audio_bytes (arr): output from extract_audio_from_video.
+        format (str): file type to save temporary file as.
+
+    Returns:
+        waveform (arr): waveform of the original audio from audio bytes
+        sample_rate (int): same rate of original audio.
     """
     with tempfile.NamedTemporaryFile(suffix='.wav') as temp_audio_file:
         # Write the audio bytes to a temporary file
