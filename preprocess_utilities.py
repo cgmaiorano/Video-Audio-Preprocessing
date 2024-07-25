@@ -110,13 +110,19 @@ def normalize_loudness(audio, rate, target_loudness=-23):
     Normalizes the loudness of the audio to target_loudness.
 
     Args:
-        audio (
+        audio (arr): audio waveform extracted from the video
+        rate (int): sample rate of audio
+        target_loudness (int): target loudness to normalize to
+
+    Returns:
+        normalized_loudness_audio (tensor): audio tensor normalized to target_loudness
     """
     meter = pyln.Meter(rate)  # create a BS.1770 meter
     current_loudness = meter.integrated_loudness(np.array(audio.squeeze()))
     # Normalize the loudness of the audio to the target loudness level
     loudness_normalized_audio = pyln.normalize.loudness(np.array(audio.squeeze()), current_loudness, target_loudness)
-    return torch.tensor(loudness_normalized_audio).unsqueeze(0)
+    normalized_loudness_audio = torch.tensor(loudness_normalized_audio).unsqueeze(0)
+    return normalized_loudness_audio
 
 
 
@@ -135,6 +141,16 @@ def natural_sort_key(s):
 
 
 def list_files(folder_path, format):
+    """ 
+    Read all files in given folder and natural sort them.
+
+    Args:
+        folder_path (str): path to folder containing original videos
+        format (str): file type to search for in folder_path
+
+    Returns:
+        files (list): list of files in folder, sorted
+    """
     path_pattern = os.path.join(folder_path, '**', '*.' + format)
     files = glob.glob(path_pattern, recursive=True)
     files.sort(key=natural_sort_key)
@@ -148,6 +164,9 @@ def get_device():
 
 
 def save_json(file, results):
+    """
+    
+    """
     with open(file, 'w') as f:
         json.dump(results, f)
 
