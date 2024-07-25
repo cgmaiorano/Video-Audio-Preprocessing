@@ -12,6 +12,12 @@ import tempfile
 def extract_audio_from_video(video_path):
     """
     Extracts audio from video with no compression and returns audio bytes.
+    
+    Args:
+        video_path (str): The path to the video file from which the audio will be extracted.
+    
+    Returns:
+        tuple: A tuple of mixed integer and string parts for sorting.
     """
     stream = ffmpeg.input(video_path)
     mixed_audio = ffmpeg.filter([stream], 'amix', inputs=2, duration='longest')
