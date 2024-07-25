@@ -51,6 +51,15 @@ def convert_stereo_to_mono(waveform):
 def resample_audio(waveform, orig_sample_rate, new_sample_rate=16000):
     """
     Resamples the audio waveform to a new sample rate.
+
+    Args:
+         waveform (arr): waveform converted to mono from stereo.
+         orig_sample_rate (int): sample rate of original audio
+         new_sample_rate (int): target sample rate to resample the audio to
+
+    Returns:
+        waveform_resampled (arr): waveform resampled to new sample rate
+        new_sample_rate (int): target sample rate to resample the audio to
     """
     resampler = torchaudio.transforms.Resample(orig_freq=orig_sample_rate, new_freq=new_sample_rate)
     waveform_resampled = resampler(waveform)
@@ -61,6 +70,11 @@ def resample_audio(waveform, orig_sample_rate, new_sample_rate=16000):
 def save_audio(waveform, sample_rate, output_path):
     """
     Saves the audio waveform to a WAV file with 16 bits per sample.
+
+    Args:
+        waveform (arr): resampled waveform of audio 
+        sample_rate (int): sample rate of waveform
+        output_path (str): path to save waveform to wav file
     """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     torchaudio.save(output_path, waveform, sample_rate, bits_per_sample=16)
@@ -94,6 +108,9 @@ def load_audio_from_bytes(audio_bytes, format):
 def normalize_loudness(audio, rate, target_loudness=-23):
     """
     Normalizes the loudness of the audio to target_loudness.
+
+    Args:
+        audio (
     """
     meter = pyln.Meter(rate)  # create a BS.1770 meter
     current_loudness = meter.integrated_loudness(np.array(audio.squeeze()))
