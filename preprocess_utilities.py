@@ -42,7 +42,7 @@ def convert_stereo_to_mono(waveform):
     Returns:
         waveform (arr): waveform converted to mono from stereo.
     """
-    if waveform.shape[0] > 1:  # Check if the audio is stereo
+    if waveform.shape[0] > 1:  
         waveform = torch.mean(waveform, dim=0, keepdim=True)
     return waveform
 
@@ -94,11 +94,8 @@ def load_audio_from_bytes(audio_bytes, format):
         sample_rate (int): same rate of original audio.
     """
     with tempfile.NamedTemporaryFile(suffix='.wav') as temp_audio_file:
-        # Write the audio bytes to a temporary file
         temp_audio_file.write(audio_bytes)
-        temp_audio_file.seek(0)  # Go back to the start of the file
-        
-        # Load the audio from the temporary file
+        temp_audio_file.seek(0)
         waveform, sample_rate = torchaudio.load(temp_audio_file.name, format=format)
         
     return waveform, sample_rate
@@ -117,9 +114,8 @@ def normalize_loudness(audio, rate, target_loudness=-23):
     Returns:
         normalized_loudness_audio (tensor): audio tensor normalized to target_loudness
     """
-    meter = pyln.Meter(rate)  # create a BS.1770 meter
+    meter = pyln.Meter(rate)
     current_loudness = meter.integrated_loudness(np.array(audio.squeeze()))
-    # Normalize the loudness of the audio to the target loudness level
     loudness_normalized_audio = pyln.normalize.loudness(np.array(audio.squeeze()), current_loudness, target_loudness)
     normalized_loudness_audio = torch.tensor(loudness_normalized_audio).unsqueeze(0)
     return normalized_loudness_audio
@@ -154,7 +150,7 @@ def list_files(folder_path, format):
     path_pattern = os.path.join(folder_path, '**', '*.' + format)
     files = glob.glob(path_pattern, recursive=True)
     files.sort(key=natural_sort_key)
-    return files  # Use natural sorting to maintain order
+    return files  
 
 
 
