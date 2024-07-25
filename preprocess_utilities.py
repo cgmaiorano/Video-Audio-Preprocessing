@@ -165,7 +165,11 @@ def get_device():
 
 def save_json(file, results):
     """
-    
+    Save results to a json file.
+
+    Args:
+        file (str): name of json file.
+        results : data to write to json file.
     """
     with open(file, 'w') as f:
         json.dump(results, f)
@@ -173,6 +177,14 @@ def save_json(file, results):
 
 
 def process_and_concatenate_videos(video_files, output_path, target_sample_rate=16000):
+    """
+    Take in video files list, call definied functions for processing videos to audios, append each waveform to concatenated_waveform and save the concatenated waveform.
+
+    Args:
+        video_files (list): list of video files to process
+        output_path (str): path to save concatenated waveform to
+        target_sample_rate (int): target sample rate to resample the audio to
+    """
     concatenated_waveform = []
     for video_file in video_files:
         audio_bytes = extract_audio_from_video(video_file)
