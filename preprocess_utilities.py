@@ -9,6 +9,7 @@ import numpy as np
 import json
 import tempfile
 
+
 def extract_audio_from_video(video_path):
     """
     Extracts audio from video with no compression and returns audio bytes.
@@ -29,6 +30,8 @@ def extract_audio_from_video(video_path):
         raise e
     return out
 
+
+
 def convert_stereo_to_mono(waveform):
     """
     Converts stereo audio waveform to mono by averaging the channels.
@@ -43,6 +46,8 @@ def convert_stereo_to_mono(waveform):
         waveform = torch.mean(waveform, dim=0, keepdim=True)
     return waveform
 
+
+
 def resample_audio(waveform, orig_sample_rate, new_sample_rate=16000):
     """
     Resamples the audio waveform to a new sample rate.
@@ -51,12 +56,16 @@ def resample_audio(waveform, orig_sample_rate, new_sample_rate=16000):
     waveform_resampled = resampler(waveform)
     return waveform_resampled, new_sample_rate
 
+
+
 def save_audio(waveform, sample_rate, output_path):
     """
     Saves the audio waveform to a WAV file with 16 bits per sample.
     """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     torchaudio.save(output_path, waveform, sample_rate, bits_per_sample=16)
+
+
 
 def load_audio_from_bytes(audio_bytes, format):
     """
@@ -80,6 +89,8 @@ def load_audio_from_bytes(audio_bytes, format):
         
     return waveform, sample_rate
 
+
+
 def normalize_loudness(audio, rate, target_loudness=-23):
     """
     Normalizes the loudness of the audio to target_loudness.
@@ -89,6 +100,8 @@ def normalize_loudness(audio, rate, target_loudness=-23):
     # Normalize the loudness of the audio to the target loudness level
     loudness_normalized_audio = pyln.normalize.loudness(np.array(audio.squeeze()), current_loudness, target_loudness)
     return torch.tensor(loudness_normalized_audio).unsqueeze(0)
+
+
 
 def natural_sort_key(s):
     """
@@ -103,18 +116,25 @@ def natural_sort_key(s):
     return [int(text) if text.isdigit() else text.lower() for text in re.split('([0-9]+)', s)]
 
 
+
 def list_files(folder_path, format):
     path_pattern = os.path.join(folder_path, '**', '*.' + format)
     files = glob.glob(path_pattern, recursive=True)
     files.sort(key=natural_sort_key)
     return files  # Use natural sorting to maintain order
 
+
+
 def get_device():
     return "cuda" if torch.cuda.is_available() else "cpu"
+
+
 
 def save_json(file, results):
     with open(file, 'w') as f:
         json.dump(results, f)
+
+
 
 def process_and_concatenate_videos(video_files, output_path, target_sample_rate=16000):
     concatenated_waveform = []
